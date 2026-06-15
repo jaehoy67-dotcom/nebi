@@ -219,7 +219,6 @@
 
     <div class="content-area">
         
-        <!-- [스크린 1] 출발 화면 -->
         <div id="screen-start" class="screen active">
             <div class="main-icon">🔧</div>
             <h1>출발 전 정비소</h1>
@@ -237,7 +236,6 @@
             <button class="btn btn-orange" id="start-btn" onclick="startNavigation()" disabled>🏁 출발하기</button>
         </div>
 
-        <!-- [스크린 2] 경로 안내 화면 -->
         <div id="screen-route" class="screen">
             <div class="main-icon" id="route-icon" style="font-size: 8rem;">🚗</div>
             <h1 id="route-target-name">장소 이름</h1>
@@ -245,7 +243,6 @@
             <button class="btn btn-blue" onclick="arriveAtPlace()">🚩 도착!</button>
         </div>
 
-        <!-- [스크린 3] 미션 확인 화면 -->
         <div id="screen-mission" class="screen">
             <div class="mission-box">
                 <div class="mission-visual-icon" id="mission-visual-icon">🎁</div>
@@ -254,7 +251,6 @@
             <button class="btn" onclick="completeMission()">✅ 미션 성공!</button>
         </div>
 
-        <!-- [스크린 4] 최종 엔딩 화면 -->
         <div id="screen-finish" class="screen">
             <div class="main-icon" style="font-size: 8rem;">🏆</div>
             <h1>안전운전 최고 왕!</h1>
@@ -262,13 +258,11 @@
             <button class="btn btn-orange" onclick="resetApp()">🔄 다시 하기</button>
         </div>
 
-        <!-- 진행바 -->
         <div class="progress-container" id="progress-container" style="display:none;">
             <div class="progress-bar" id="progress-bar"><span class="chick-marker">🐥</span></div>
         </div>
     </div>
 
-    <!-- 🚨 터널 돌발 팝업 -->
     <div id="tunnel-overlay">
         <div class="main-icon" style="font-size: 8rem; animation: bounce 1s infinite;">🚇</div>
         <div class="tunnel-box">
@@ -277,28 +271,25 @@
         <button class="btn btn-yellow" onclick="closeTunnel()">🔦 불 켰어요!</button>
     </div>
 
-    <!-- 하단 상태 배지 -->
     <div class="route-summary" id="route-summary" style="display:none;">
         <span class="badge" id="badge-p1">경찰서</span>
         <span class="badge" id="badge-p2">수영장</span>
         <span class="badge" id="badge-p3">분리수거</span>
         <span class="badge" id="badge-p4">주유소</span>
-        <span class="badge" id="badge-p5">세차장</span>
-        <span class="badge" id="badge-p6">🍔DT점</span>
-    </div>
+        <span class="badge" id="badge-p5">🎣낚시터</span> <span class="badge" id="badge-p6">세차장</span>   <span class="badge" id="badge-p7">🍔DT점</span>   </div>
 </div>
 
 <script>
-    // 데이터 구조 간소화 및 직관화
+    // 데이터 구조 간소화 및 직관화 (진영 낚시터 추가 완료)
     const middlePlaces = [
         { 
             id: 'p1', 
             name: '👮‍♂️ 우리 동네 경찰서', 
             missions: [
-                { text: "인형을 찾아서 전해줄까요?", icon: "🐶" },
-                { text: "가방을 찾아서 전해줄까요?", icon: "🎒" },
+                { text: "강아지 인형을 찾아서 전해줄까요?", icon: "🐶" },
+                { text: "빨간색 가방을 찾아서 전해줄까요?", icon: "🎒" },
                 { text: "안전을 위한 경광봉을 전해줄까요?", icon: "🚨" },
-                { text: "잃어버린 책을 찾아 줄까요?", icon: "📕" }
+                { text: "길을 잃은 아기 곰을 전해줄까요?", icon: "🧸" }
             ] 
         },
         { 
@@ -329,12 +320,21 @@
                 { text: "경유 주유기를 넣고 하나, 둘, 셋 세어보아요!", icon: "🚚" },
                 { text: "타이어 바람을 넣고 톡! 톡! 톡! 때려요!", icon: "🛞" }
             ] 
+        },
+        // ⭐ [신규 추가] 진영 낚시터 장소 및 미션 정의
+        {
+            id: 'p5',
+            name: '🎣 진영 낚시터',
+            missions: [
+                { text: "낚시를 방해하는 오리들이 나타났어요! 오리를 잡아주세요!", icon: "🦆" }
+            ]
         }
     ];
 
+    // 기존 p5, p6를 p6, p7으로 아이디 변경해 균형을 맞춤
     const finalPlaces = [
-        { id: 'p5', name: '🧼 버블버블 세차장', missions: [{ text: "커튼을 통과하며 차를 깨끗이 닦아요!", icon: "🧽" }] },
-        { id: 'p6', name: '🍔 햄버거가게 드라이브 스루', missions: [{ text: "먹고 싶은 음식을 키오스크로 주문해요!", icon: "🍔" }] }
+        { id: 'p6', name: '🧼 버블버블 세차장', missions: [{ text: "커튼을 통과하며 차를 깨끗이 닦아요!", icon: "🧽" }] },
+        { id: 'p7', name: '🍔 햄버거가게 드라이브 스루', missions: [{ text: "먹고 싶은 음식을 소리 내어 주문해요!", icon: "🍔" }] }
     ];
 
     let remainingPlaces = [];
@@ -346,17 +346,12 @@
 
     // 🔊 어린이 맞춤형 내장 TTS 구동 엔진 함수
     function speakText(text) {
-        // 현재 말하고 있는 음성이 있다면 즉시 강제 종료
         window.speechSynthesis.cancel();
-
-        // 텍스트 정제 (문장 부호 및 기호, 특수문자 제거 후 맑은 소리 유도)
         const cleanText = text.replace(/[!?,ㆍ\(\)\[\]\.\#]/g, '');
-
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'ko-KR';
-        utterance.rate = 1.0;  // 아이들이 따라 움직이기 딱 좋은 속도
-        utterance.pitch = 1.35; // 기본 기계음보다 훨씬 밝고 귀여운 하이톤 설정
-
+        utterance.rate = 1.0;  
+        utterance.pitch = 1.35; 
         window.speechSynthesis.speak(utterance);
     }
 
@@ -371,7 +366,7 @@
         remainingPlaces = [...middlePlaces].sort(() => Math.random() - 0.5);
         visitedPlacesCount = 0; isFinalStage = false; finalStageIndex = 0; tunnelTriggered = false;
         
-        for(let i=1; i<=6; i++) {
+        for(let i=1; i<=7; i++) { // 장소가 7개로 증가하여 조건을 7로 수정
             const b = document.getElementById(`badge-p${i}`);
             if(b) b.className = 'badge';
         }
@@ -381,7 +376,6 @@
     }
 
     function getNextLocation() {
-        // 🚨 터널 이벤트 발동할 때 긴급 대사 출력
         if (visitedPlacesCount === 2 && !tunnelTriggered) {
             tunnelTriggered = true;
             document.getElementById('tunnel-overlay').style.display = 'flex';
@@ -410,12 +404,11 @@
         document.getElementById('header-text').innerText = `▶️ 안내 중`;
         document.getElementById('route-target-name').innerText = currentPlace.name;
         
-        const icons = {'p1':'👮‍♂️', 'p2':'🏊‍♂️', 'p3':'♻️', 'p4':'⛽', 'p5':'🧼', 'p6':'🍔'};
+        const icons = {'p1':'👮‍♂️', 'p2':'🏊‍♂️', 'p3':'♻️', 'p4':'⛽', 'p5':'🎣', 'p6':'🧼', 'p7':'🍔'};
         document.getElementById('route-icon').innerText = icons[currentPlace.id] || '📍';
 
         showScreen('screen-route');
         
-        // 이동 가이드 음성 출력 (이모지 제외 순수 글자 가공)
         const cleanName = currentPlace.name.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDC00-\uDFFF]/g, '');
         speakText(`${cleanName}으로 안전하게 출발하세요!`);
     }
@@ -427,17 +420,23 @@
             ? currentPlace.missions[0] 
             : currentPlace.missions[Math.floor(Math.random() * currentPlace.missions.length)];
         
+        // ⭐ [핵심 수정] 낚시터 미션일 때 문구 안에 2~4마리 무작위 숫자를 삽입하는 로직 추가
+        let finalMissionText = selectedMission.text;
+        if (currentPlace.id === 'p5') {
+            const randomDucks = Math.floor(Math.random() * 3) + 2; // 2, 3, 4 중 하나 랜덤 뽑기
+            finalMissionText = `낚시를 방해하는 오리들이 나타났어요! 오리 ${randomDucks}마리를 잡아주세요!`;
+        }
+
         document.getElementById('mission-visual-icon').innerText = selectedMission.icon;
-        document.getElementById('mission-text').innerText = selectedMission.text;
+        document.getElementById('mission-text').innerText = finalMissionText; // 완성된 문구 적용
         
         showScreen('screen-mission');
         
-        // 🎯 핵심: 미션 도착 창 열릴 때 짧은 음성 가이드 송출!
-        speakText(`오늘의 비밀 미션! ${selectedMission.text}`);
+        speakText(`오늘의 비밀 미션! ${finalMissionText}`);
     }
 
     function completeMission() {
-        window.speechSynthesis.cancel(); // 완료하면 소리 끄기
+        window.speechSynthesis.cancel(); 
         visitedPlacesCount++;
         updateProgressBar();
         const activeBadge = document.getElementById(`badge-${currentPlace.id}`);
@@ -452,7 +451,8 @@
     }
 
     function updateProgressBar() {
-        document.getElementById('progress-bar').style.width = `${(visitedPlacesCount / 6) * 100}%`;
+        // 총 장소가 6개에서 7개로 증가했기 때문에 분모를 7로 수정했습니다.
+        document.getElementById('progress-bar').style.width = `${(visitedPlacesCount / 7) * 100}%`;
     }
 
     function showScreen(id) {
