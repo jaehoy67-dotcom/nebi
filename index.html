@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>진영 유치원 자동차 놀이 네비게이션</title>
     <style>
-        /* 기본 스타일 및 네비게이션 지도 배경 연출 */
         * {
             box-sizing: border-box;
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
@@ -24,8 +23,7 @@
             min-height: 100vh;
             overflow: hidden;
         }
-        
-        /* 전체 앱 컨테이너 디자인 */
+
         #app-container {
             width: 100%;
             max-width: 500px;
@@ -40,19 +38,20 @@
             overflow: hidden;
             border: 4px solid #ffffff;
         }
-        
+
         #app-container::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-image: linear-gradient(rgba(52, 152, 219, 0.04) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(52, 152, 219, 0.04) 1px, transparent 1px);
+            background-image:
+                linear-gradient(rgba(52,152,219,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52,152,219,0.04) 1px, transparent 1px);
             background-size: 20px 20px;
             pointer-events: none;
             z-index: 1;
         }
 
-        /* 상단 네비게이션 바 */
+        /* 상단 헤더 */
         .nav-header {
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
@@ -62,13 +61,39 @@
             font-weight: bold;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 10;
             letter-spacing: -0.5px;
         }
-        
-        /* 메인 콘텐츠 영역 */
+
+        /* 🔊 소리 ON/OFF 토글 버튼 */
+        #sound-toggle {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        #sound-toggle:active { transform: scale(0.9); }
+        #sound-toggle.muted { background: rgba(255,100,100,0.3); border-color: rgba(255,100,100,0.6); }
+
+        #header-text {
+            flex: 1;
+            text-align: center;
+        }
+
+        /* 헤더 오른쪽 여백 (토글버튼과 균형 맞추기) */
+        .header-spacer { width: 42px; flex-shrink: 0; }
+
+        /* 메인 콘텐츠 */
         .content-area {
             flex: 1;
             display: flex;
@@ -80,14 +105,14 @@
             z-index: 2;
             position: relative;
         }
+
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
         .screen.active { display: flex; }
-        
-        /* 폰트 세팅 타이틀 간소화 */
+
         h1 { font-size: 2.2rem; color: #1a252f; margin: 0 0 10px 0; font-weight: 800; line-height: 1.3; word-break: keep-all; }
         .description { font-size: 1.1rem; color: #7f8c8d; margin-bottom: 20px; line-height: 1.5; word-break: keep-all; font-weight: 500; }
-        
-        /* 📋 출발 전 점검 (체크박스 아이콘화) */
+
+        /* 체크리스트 */
         .checklist-box {
             background-color: #f8fafc;
             border: 2px solid #cbd5e1;
@@ -108,16 +133,19 @@
             border: 1px solid #e2e8f0;
             cursor: pointer;
             text-align: left;
+            transition: background-color 0.2s;
         }
+        .check-item:hover { background-color: #f0f7ff; }
         .check-item input[type="checkbox"] {
             width: 26px;
             height: 26px;
             margin-right: 14px;
             accent-color: #ff9800;
+            cursor: pointer;
         }
         .check-item span { font-size: 1.15rem; font-weight: bold; color: #334155; }
 
-        /* 🎯 대형 그림 미션 박스 디자인 */
+        /* 미션 박스 */
         .mission-box {
             background: linear-gradient(135deg, #ffffff 0%, #f9fbf9 100%);
             border: 3px solid #81c784;
@@ -125,41 +153,37 @@
             padding: 20px;
             width: 95%;
             margin-bottom: 20px;
-            box-shadow: 0 10px 25px rgba(46, 125, 50, 0.1);
+            box-shadow: 0 10px 25px rgba(46,125,50,0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
         }
-        
-        /* 미션 통과용 핵심 그림 (가장 크게!) */
         .mission-visual-icon {
             font-size: 7.5rem;
             margin: 15px 0;
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
             animation: bounce 2s ease-in-out infinite;
         }
-        
-        /* 글씨는 짧고 굵게 변경 */
-        .mission-text { 
-            font-size: 1.6rem; 
-            font-weight: 900; 
-            color: #1b5e20; 
-            line-height: 1.4; 
+        .mission-text {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #1b5e20;
+            line-height: 1.4;
             word-break: keep-all;
             background-color: #e8f5e9;
             padding: 10px 20px;
             border-radius: 15px;
             width: 100%;
         }
-        
-        /* 🔄 애니메이션 */
-        .main-icon { 
-            font-size: 7rem; 
-            margin-bottom: 15px; 
-            animation: swaying 3s ease-in-out infinite; 
+
+        /* 아이콘 애니메이션 */
+        .main-icon {
+            font-size: 7rem;
+            margin-bottom: 15px;
+            animation: swaying 3s ease-in-out infinite;
         }
-        
+
         @keyframes swaying {
             0% { transform: rotate(-6deg); }
             50% { transform: rotate(6deg) translateY(-5px); }
@@ -170,213 +194,338 @@
             50% { transform: translateY(-10px); }
         }
         @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
-        
-        /* 입체 버튼 */
+
+        /* 감속 모션 설정 (접근성) */
+        @media (prefers-reduced-motion: reduce) {
+            .main-icon, .mission-visual-icon { animation: none !important; }
+        }
+
+        /* 버튼 */
         .btn {
             background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-            color: white; border: none; padding: 18px 40px; font-size: 1.5rem;
-            font-weight: bold; border-radius: 50px; cursor: pointer; width: 90%;
-            box-shadow: 0 8px 20px rgba(76,175,80,0.35); text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 90%;
+            box-shadow: 0 8px 20px rgba(76,175,80,0.35);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
             transition: all 0.2s;
         }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
         .btn:active { transform: scale(0.95); }
         .btn-orange { background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); box-shadow: 0 8px 20px rgba(255,152,0,0.35); }
         .btn-blue { background: linear-gradient(135deg, #2196f3 0%, #1e88e5 100%); box-shadow: 0 8px 20px rgba(33,150,243,0.35); }
-        .btn:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; box-shadow: none !important; cursor: not-allowed; }
-        
-        /* 🚨 터널 오버레이 */
+        .btn:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; box-shadow: none !important; cursor: not-allowed; transform: none !important; filter: none !important; }
+
+        /* 터널 오버레이 */
         #tunnel-overlay {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #111111 0%, #2c3e50 100%); z-index: 100;
-            color: white; flex-direction: column; align-items: center; justify-content: center; padding: 30px;
+            display: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #111111 0%, #2c3e50 100%);
+            z-index: 100;
+            color: white;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
             animation: flicker 0.5s infinite;
         }
         .tunnel-box {
-            background-color: rgba(255,255,255,0.08); border: 3px dashed #f1c40f;
-            border-radius: 24px; padding: 25px 20px; width: 100%; margin-bottom: 30px;
+            background-color: rgba(255,255,255,0.08);
+            border: 3px dashed #f1c40f;
+            border-radius: 24px;
+            padding: 25px 20px;
+            width: 100%;
+            margin-bottom: 30px;
         }
         .tunnel-main-text { font-size: 1.8rem; font-weight: bold; line-height: 1.5; color: #ffffff; }
         .btn-yellow { background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%); color: #222; box-shadow: 0 8px 25px rgba(241,196,15,0.4); }
 
         /* 진행바 */
-        .progress-container { width: 100%; background-color: #e2e8f0; height: 20px; border-radius: 20px; margin-top: auto; margin-bottom: 15px; border: 1px solid #cbd5e1; position: relative; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, #ffe082 0%, #ffd54f 100%); width: 0%; border-radius: 20px; position: relative; transition: width 0.4s ease; }
+        .progress-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            height: 20px;
+            border-radius: 20px;
+            margin-top: auto;
+            margin-bottom: 15px;
+            border: 1px solid #cbd5e1;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ffe082 0%, #ffd54f 100%);
+            width: 0%;
+            border-radius: 20px;
+            position: relative;
+            transition: width 0.4s ease;
+        }
         .chick-marker { position: absolute; right: -15px; top: -14px; font-size: 1.7rem; }
-        
-        /* 하단 상태 배지 */
-        .route-summary { background-color: #f8f9fa; border-top: 1px solid #e2e8f0; padding: 12px; width: 100%; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+
+        /* 하단 배지 */
+        .route-summary {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e2e8f0;
+            padding: 12px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
         .badge { font-size: 0.85rem; padding: 5px 10px; border-radius: 8px; background-color: #e2e8f0; color: #64748b; font-weight: bold; }
         .badge.visited { background-color: #d1fae5; color: #065f46; text-decoration: line-through; opacity: 0.7; }
         .badge.current { background-color: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+
+        /* 미션 완료 효과 오버레이 */
+        #success-overlay {
+            display: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(76,175,80,0.92);
+            z-index: 200;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        #success-overlay .success-icon { font-size: 9rem; animation: pop 0.4s ease; }
+        #success-overlay .success-text { font-size: 2.5rem; font-weight: 900; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.2); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pop { 0% { transform: scale(0.5); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
 <div id="app-container">
+
+    <!-- 상단 헤더 -->
     <div class="nav-header">
+        <div class="header-spacer"></div>
         <span id="header-text">어린이 마을 안전 내비게이션</span>
+        <button id="sound-toggle" onclick="toggleSound()" aria-label="소리 켜기/끄기" title="소리 켜기/끄기">🔊</button>
     </div>
 
     <div class="content-area">
-        
+
+        <!-- [스크린 1] 출발 화면 -->
         <div id="screen-start" class="screen active">
             <div class="main-icon">🔧</div>
             <h1>출발 전 정비소</h1>
-            
             <div class="checklist-box">
                 <label class="check-item">
-                    <input type="checkbox" id="check-belt" onchange="validateChecklist()">
+                    <input type="checkbox" id="check-belt" onchange="validateChecklist()" aria-label="안전벨트 확인">
                     <span>안전벨트 매기 🦺</span>
                 </label>
                 <label class="check-item">
-                    <input type="checkbox" id="check-license" onchange="validateChecklist()">
+                    <input type="checkbox" id="check-license" onchange="validateChecklist()" aria-label="운전면허증 확인">
                     <span>운전면허증 챙기기 🪪</span>
                 </label>
             </div>
-            <button class="btn btn-orange" id="start-btn" onclick="startNavigation()" disabled>🏁 출발하기</button>
+            <button class="btn btn-orange" id="start-btn" onclick="startNavigation()" disabled aria-label="출발하기">🏁 출발하기</button>
         </div>
 
+        <!-- [스크린 2] 경로 안내 화면 -->
         <div id="screen-route" class="screen">
-            <div class="main-icon" id="route-icon" style="font-size: 8rem;">🚗</div>
+            <div class="main-icon" id="route-icon" style="font-size: 8rem;" aria-hidden="true">🚗</div>
             <h1 id="route-target-name">장소 이름</h1>
             <p class="description" style="font-size: 1.3rem; color: #2196f3; font-weight: bold;">안전하게 운전해서 이동하세요!</p>
-            <button class="btn btn-blue" onclick="arriveAtPlace()">🚩 도착!</button>
+            <button class="btn btn-blue" onclick="arriveAtPlace()" aria-label="도착 확인">🚩 도착!</button>
         </div>
 
+        <!-- [스크린 3] 미션 확인 화면 -->
         <div id="screen-mission" class="screen">
             <div class="mission-box">
-                <div class="mission-visual-icon" id="mission-visual-icon">🎁</div>
+                <div class="mission-visual-icon" id="mission-visual-icon" aria-hidden="true">🎁</div>
                 <div class="mission-text" id="mission-text">미션 내용</div>
             </div>
-            <button class="btn" onclick="completeMission()">✅ 미션 성공!</button>
+            <button class="btn" onclick="completeMission()" aria-label="미션 성공">✅ 미션 성공!</button>
         </div>
 
+        <!-- [스크린 4] 최종 엔딩 화면 -->
         <div id="screen-finish" class="screen">
-            <div class="main-icon" style="font-size: 8rem;">🏆</div>
+            <div class="main-icon" style="font-size: 8rem;" aria-hidden="true">🏆</div>
             <h1>안전운전 최고 왕!</h1>
             <p class="description" style="font-size: 1.3rem; color:#4caf50; font-weight: bold;">주차장으로 복귀하세요!</p>
-            <button class="btn btn-orange" onclick="resetApp()">🔄 다시 하기</button>
+            <button class="btn btn-orange" onclick="resetApp()" aria-label="다시 시작">🔄 다시 하기</button>
         </div>
 
-        <div class="progress-container" id="progress-container" style="display:none;">
-            <div class="progress-bar" id="progress-bar"><span class="chick-marker">🐥</span></div>
+        <!-- 진행바 -->
+        <div class="progress-container" id="progress-container" style="display:none;" role="progressbar" aria-label="진행 상황">
+            <div class="progress-bar" id="progress-bar"><span class="chick-marker" aria-hidden="true">🐥</span></div>
         </div>
     </div>
 
-    <div id="tunnel-overlay">
-        <div class="main-icon" style="font-size: 8rem; animation: bounce 1s infinite;">🚇</div>
+    <!-- 터널 돌발 팝업 -->
+    <div id="tunnel-overlay" role="alertdialog" aria-modal="true" aria-label="터널 이벤트">
+        <div class="main-icon" style="font-size: 8rem; animation: bounce 1s infinite;" aria-hidden="true">🚇</div>
         <div class="tunnel-box">
             <div class="tunnel-main-text">앗! 어두운 터널이에요!<br><span style="color:#f1c40f; font-size:2.2rem; font-weight:900;">[헤드라이트]</span>를 켜세요!</div>
         </div>
-        <button class="btn btn-yellow" onclick="closeTunnel()">🔦 불 켰어요!</button>
+        <button class="btn btn-yellow" onclick="closeTunnel()" aria-label="헤드라이트 켜기">🔦 불 켰어요!</button>
     </div>
 
-    <div class="route-summary" id="route-summary" style="display:none;">
+    <!-- 미션 완료 효과 -->
+    <div id="success-overlay" aria-live="assertive">
+        <div class="success-icon" aria-hidden="true">⭐</div>
+        <div class="success-text">미션 성공!</div>
+    </div>
+
+    <!-- 하단 배지 -->
+    <div class="route-summary" id="route-summary" style="display:none;" aria-label="방문 경로 현황">
         <span class="badge" id="badge-p1">경찰서</span>
         <span class="badge" id="badge-p2">수영장</span>
         <span class="badge" id="badge-p3">분리수거</span>
         <span class="badge" id="badge-p4">주유소</span>
-        <span class="badge" id="badge-p5">🎣낚시터</span> <span class="badge" id="badge-p6">세차장</span>   <span class="badge" id="badge-p7">🍔DT점</span>   </div>
+        <span class="badge" id="badge-p5">세차장</span>
+        <span class="badge" id="badge-p6">🍔DT점</span>
+    </div>
 </div>
 
 <script>
-    // 데이터 구조 간소화 및 직관화 (진영 낚시터 추가 완료)
+    // ─── 데이터 ───────────────────────────────────────────────
     const middlePlaces = [
-        { 
-            id: 'p1', 
-            name: '👮‍♂️ 우리 동네 경찰서', 
+        {
+            id: 'p1',
+            name: '우리 동네 경찰서',
+            displayName: '👮‍♂️ 우리 동네 경찰서',
             missions: [
                 { text: "강아지 인형을 찾아서 전해줄까요?", icon: "🐶" },
                 { text: "빨간색 가방을 찾아서 전해줄까요?", icon: "🎒" },
                 { text: "안전을 위한 경광봉을 전해줄까요?", icon: "🚨" },
                 { text: "길을 잃은 아기 곰을 전해줄까요?", icon: "🧸" }
-            ] 
+            ]
         },
-        { 
-            id: 'p2', 
-            name: '🏊‍♂️ 스위밍 몬스터 (수영장)', 
+        {
+            id: 'p2',
+            name: '스위밍 몬스터 수영장',
+            displayName: '🏊‍♂️ 스위밍 몬스터 (수영장)',
             missions: [
                 { text: "앞으로 어푸어푸! 자유형 다섯 번 하기!", icon: "🏊" },
                 { text: "옆으로 개굴개굴! 개구리헤엄 다섯 번 하기!", icon: "🐸" },
                 { text: "뒤로 누워서 으쓱으쓱! 배영 다섯 번 하기!", icon: "🛌" },
                 { text: "물에 빠진 친구가 있어요! 심폐소생술 다섯 번 하기!", icon: "❤️" }
-            ] 
+            ]
         },
-        { 
-            id: 'p3', 
-            name: '♻️ 그린 분리수거장', 
+        {
+            id: 'p3',
+            name: '그린 분리수거장',
+            displayName: '♻️ 그린 분리수거장',
             missions: [
                 { text: "플라스틱 통에 페트병을 쏙 넣어요!", icon: "🍾" },
                 { text: "종이 수거함에 상자를 차곡차곡 넣어요!", icon: "📦" },
                 { text: "캔 수거함에 음료수 캔을 쏙 넣어요!", icon: "🥫" }
-            ] 
+            ]
         },
-        { 
-            id: 'p4', 
-            name: '⛽ 진영 주유소', 
+        {
+            id: 'p4',
+            name: '진영 주유소',
+            displayName: '⛽ 진영 주유소',
             missions: [
                 { text: "휘발유 주유기를 넣고 하나, 둘, 셋 세어보아요!", icon: "⛽" },
                 { text: "전기차 충전선 플러그를 꽂아주세요!", icon: "⚡" },
                 { text: "경유 주유기를 넣고 하나, 둘, 셋 세어보아요!", icon: "🚚" },
                 { text: "타이어 바람을 넣고 톡! 톡! 톡! 때려요!", icon: "🛞" }
-            ] 
-        },
-        // ⭐ [신규 추가] 진영 낚시터 장소 및 미션 정의
-        {
-            id: 'p5',
-            name: '🎣 진영 낚시터',
-            missions: [
-                { text: "낚시를 방해하는 오리들이 나타났어요! 오리를 잡아주세요!", icon: "🦆" }
             ]
         }
     ];
 
-    // 기존 p5, p6를 p6, p7으로 아이디 변경해 균형을 맞춤
     const finalPlaces = [
-        { id: 'p6', name: '🧼 버블버블 세차장', missions: [{ text: "커튼을 통과하며 차를 깨끗이 닦아요!", icon: "🧽" }] },
-        { id: 'p7', name: '🍔 햄버거가게 드라이브 스루', missions: [{ text: "먹고 싶은 음식을 소리 내어 주문해요!", icon: "🍔" }] }
+        { id: 'p5', name: '버블버블 세차장', displayName: '🧼 버블버블 세차장', missions: [{ text: "커튼을 통과하며 차를 깨끗이 닦아요!", icon: "🧽" }] },
+        { id: 'p6', name: '햄버거가게 드라이브 스루', displayName: '🍔 햄버거가게 드라이브 스루', missions: [{ text: "먹고 싶은 음식을 소리 내어 주문해요!", icon: "🍔" }] }
     ];
 
+    // ─── 상태 변수 ────────────────────────────────────────────
     let remainingPlaces = [];
     let visitedPlacesCount = 0;
     let currentPlace = null;
     let isFinalStage = false;
     let finalStageIndex = 0;
-    let tunnelTriggered = false; 
+    let tunnelTriggered = false;
+    let isMuted = false;
+    let ttsReady = false;
 
-    // 🔊 어린이 맞춤형 내장 TTS 구동 엔진 함수
+    // 총 장소 수 (하드코딩 제거 → 자동 계산)
+    const TOTAL_PLACES = middlePlaces.length + finalPlaces.length;
+
+    // ─── TTS 워밍업 (iOS Safari 첫 음성 문제 해결) ────────────
+    function warmUpTTS() {
+        if (ttsReady) return;
+        ttsReady = true;
+        const warmUp = new SpeechSynthesisUtterance('');
+        warmUp.volume = 0;
+        window.speechSynthesis.speak(warmUp);
+    }
+
+    // 첫 터치/클릭 시 워밍업 실행
+    document.body.addEventListener('touchstart', warmUpTTS, { once: true });
+    document.body.addEventListener('click', warmUpTTS, { once: true });
+
+    // ─── 소리 ON/OFF ─────────────────────────────────────────
+    function toggleSound() {
+        isMuted = !isMuted;
+        const btn = document.getElementById('sound-toggle');
+        btn.textContent = isMuted ? '🔇' : '🔊';
+        btn.classList.toggle('muted', isMuted);
+        if (isMuted) window.speechSynthesis.cancel();
+    }
+
+    // ─── TTS 발화 ─────────────────────────────────────────────
     function speakText(text) {
+        if (isMuted) return;
         window.speechSynthesis.cancel();
-        const cleanText = text.replace(/[!?,ㆍ\(\)\[\]\.\#]/g, '');
+
+        // 이모지 제거 (유니코드 Emoji 속성 기반 - ZWJ 이모지도 제거)
+        const cleanText = text
+            .replace(/\p{Emoji_Presentation}/gu, '')
+            .replace(/\p{Emoji}\uFE0F/gu, '')
+            .replace(/[!?,ㆍ\(\)\[\]\.\#]/g, '')
+            .trim();
+
+        if (!cleanText) return;
+
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'ko-KR';
-        utterance.rate = 1.0;  
-        utterance.pitch = 1.35; 
+        utterance.rate = 1.0;
+        utterance.pitch = 1.35;
         window.speechSynthesis.speak(utterance);
     }
 
+    // ─── 체크리스트 유효성 ────────────────────────────────────
     function validateChecklist() {
         const isBeltChecked = document.getElementById('check-belt').checked;
         const isLicenseChecked = document.getElementById('check-license').checked;
-        const startBtn = document.getElementById('start-btn');
-        startBtn.disabled = !(isBeltChecked && isLicenseChecked);
+        document.getElementById('start-btn').disabled = !(isBeltChecked && isLicenseChecked);
     }
 
+    // ─── 내비게이션 시작 ──────────────────────────────────────
     function startNavigation() {
         remainingPlaces = [...middlePlaces].sort(() => Math.random() - 0.5);
-        visitedPlacesCount = 0; isFinalStage = false; finalStageIndex = 0; tunnelTriggered = false;
-        
-        for(let i=1; i<=7; i++) { // 장소가 7개로 증가하여 조건을 7로 수정
+        visitedPlacesCount = 0;
+        isFinalStage = false;
+        finalStageIndex = 0;
+        tunnelTriggered = false;
+
+        for (let i = 1; i <= TOTAL_PLACES; i++) {
             const b = document.getElementById(`badge-p${i}`);
-            if(b) b.className = 'badge';
+            if (b) b.className = 'badge';
         }
+
         document.getElementById('progress-container').style.display = 'block';
         document.getElementById('route-summary').style.display = 'flex';
-        updateProgressBar(); getNextLocation();
+        updateProgressBar();
+        getNextLocation();
     }
 
+    // ─── 다음 장소 결정 ───────────────────────────────────────
     function getNextLocation() {
-        if (visitedPlacesCount === 2 && !tunnelTriggered) {
+        // 터널 이벤트: 전체 경로의 중간 지점에서 발동
+        const tunnelTriggerPoint = Math.floor(middlePlaces.length / 2);
+        if (visitedPlacesCount === tunnelTriggerPoint && !isFinalStage && !tunnelTriggered) {
             tunnelTriggered = true;
             document.getElementById('tunnel-overlay').style.display = 'flex';
             speakText("앗! 어두운 터널이에요! 헤드라이트를 켜세요!");
@@ -399,73 +548,78 @@
         }
 
         const activeBadge = document.getElementById(`badge-${currentPlace.id}`);
-        if(activeBadge) activeBadge.className = 'badge current';
+        if (activeBadge) activeBadge.className = 'badge current';
 
+        const icons = { 'p1':'👮‍♂️', 'p2':'🏊‍♂️', 'p3':'♻️', 'p4':'⛽', 'p5':'🧼', 'p6':'🍔' };
         document.getElementById('header-text').innerText = `▶️ 안내 중`;
-        document.getElementById('route-target-name').innerText = currentPlace.name;
-        
-        const icons = {'p1':'👮‍♂️', 'p2':'🏊‍♂️', 'p3':'♻️', 'p4':'⛽', 'p5':'🎣', 'p6':'🧼', 'p7':'🍔'};
+        document.getElementById('route-target-name').innerText = currentPlace.displayName;
         document.getElementById('route-icon').innerText = icons[currentPlace.id] || '📍';
 
         showScreen('screen-route');
-        
-        const cleanName = currentPlace.name.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDC00-\uDFFF]/g, '');
-        speakText(`${cleanName}으로 안전하게 출발하세요!`);
+        speakText(`${currentPlace.name}으로 안전하게 출발하세요!`);
     }
 
+    // ─── 장소 도착 ────────────────────────────────────────────
     function arriveAtPlace() {
         document.getElementById('header-text').innerText = `🎯 미션 포인트 도착`;
-        
-        let selectedMission = isFinalStage 
-            ? currentPlace.missions[0] 
+
+        const selectedMission = isFinalStage
+            ? currentPlace.missions[0]
             : currentPlace.missions[Math.floor(Math.random() * currentPlace.missions.length)];
-        
-        // ⭐ [핵심 수정] 낚시터 미션일 때 문구 안에 2~4마리 무작위 숫자를 삽입하는 로직 추가
-        let finalMissionText = selectedMission.text;
-        if (currentPlace.id === 'p5') {
-            const randomDucks = Math.floor(Math.random() * 3) + 2; // 2, 3, 4 중 하나 랜덤 뽑기
-            finalMissionText = `낚시를 방해하는 오리들이 나타났어요! 오리 ${randomDucks}마리를 잡아주세요!`;
-        }
 
         document.getElementById('mission-visual-icon').innerText = selectedMission.icon;
-        document.getElementById('mission-text').innerText = finalMissionText; // 완성된 문구 적용
-        
+        document.getElementById('mission-text').innerText = selectedMission.text;
+
         showScreen('screen-mission');
-        
-        speakText(`오늘의 비밀 미션! ${finalMissionText}`);
+        speakText(`오늘의 비밀 미션! ${selectedMission.text}`);
     }
 
+    // ─── 미션 완료 (성공 효과 추가) ──────────────────────────
     function completeMission() {
-        window.speechSynthesis.cancel(); 
-        visitedPlacesCount++;
-        updateProgressBar();
-        const activeBadge = document.getElementById(`badge-${currentPlace.id}`);
-        if(activeBadge) { activeBadge.className = 'badge visited'; }
-        getNextLocation();
+        window.speechSynthesis.cancel();
+
+        // 미션 완료 효과 오버레이 표시
+        const overlay = document.getElementById('success-overlay');
+        overlay.style.display = 'flex';
+
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            visitedPlacesCount++;
+            updateProgressBar();
+            const activeBadge = document.getElementById(`badge-${currentPlace.id}`);
+            if (activeBadge) activeBadge.className = 'badge visited';
+            getNextLocation();
+        }, 900);
     }
 
+    // ─── 터널 닫기 ────────────────────────────────────────────
     function closeTunnel() {
         window.speechSynthesis.cancel();
         document.getElementById('tunnel-overlay').style.display = 'none';
-        getNextLocation(); 
+        getNextLocation();
     }
 
+    // ─── 진행바 업데이트 (총 개수 동적 계산) ─────────────────
     function updateProgressBar() {
-        // 총 장소가 6개에서 7개로 증가했기 때문에 분모를 7로 수정했습니다.
-        document.getElementById('progress-bar').style.width = `${(visitedPlacesCount / 7) * 100}%`;
+        const pct = (visitedPlacesCount / TOTAL_PLACES) * 100;
+        document.getElementById('progress-bar').style.width = `${pct}%`;
     }
 
+    // ─── 화면 전환 ────────────────────────────────────────────
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
+    // ─── 초기화 ───────────────────────────────────────────────
     function resetApp() {
         window.speechSynthesis.cancel();
         document.getElementById('header-text').innerText = "어린이 마을 안전 내비게이션";
         document.getElementById('check-belt').checked = false;
         document.getElementById('check-license').checked = false;
         document.getElementById('start-btn').disabled = true;
+        document.getElementById('progress-container').style.display = 'none';
+        document.getElementById('route-summary').style.display = 'none';
         showScreen('screen-start');
     }
 </script>
