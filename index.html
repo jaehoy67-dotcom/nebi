@@ -487,9 +487,7 @@
             name: '그린 분리수거장',
             displayName: '♻️ 그린 분리수거장',
             missions: [
-                { text: "플라스틱 통에 페트병을 쏙 넣어요!", icon: "🍾" },
-                { text: "종이 수거함에 상자를 차곡차곡 넣어요!", icon: "📦" },
-                { text: "캔 수거함에 음료수 캔을 쏙 넣어요!", icon: "🥫" }
+                { text: "쓰레기들을 알맞게 분리수거하세요!", icon: "♻️" }
             ]
         },
         {
@@ -680,7 +678,7 @@
 
         document.getElementById('duck-remaining').textContent = duckCount;
         showScreen('screen-fishing');
-        speakText(`낚시를 방해하는 오리가 ${duckCount}마리 있어요! 모두 잡아주세요!`);
+        speakText("낚시를 방해하는 오리가 몇 마리 있네요! 모두 잡아주세요!");
     }
 
     function catchDuck(btn) {
