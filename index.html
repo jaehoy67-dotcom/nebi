@@ -507,11 +507,18 @@
             displayName: '🎣 진영 낚시터',
             type: 'fishing',
             missions: [] // 낚시 미션은 별도 화면으로 처리
+        },
+        {
+            id: 'p5',
+            name: '버블버블 세차장',
+            displayName: '🧼 버블버블 세차장',
+            missions: [
+                { text: "커튼을 통과하며 차를 깨끗이 닦아요!", icon: "🧽" }
+            ]
         }
     ];
 
     const finalPlaces = [
-        { id: 'p5', name: '버블버블 세차장', displayName: '🧼 버블버블 세차장', missions: [{ text: "커튼을 통과하며 차를 깨끗이 닦아요!", icon: "🧽" }] },
         { id: 'p6', name: '햄버거가게 드라이브 스루', displayName: '🍔 햄버거가게 드라이브 스루', missions: [{ text: "먹고 싶은 음식을 소리 내어 주문해요!", icon: "🍔" }] }
     ];
 
@@ -525,8 +532,11 @@
     let isMuted = false;
     let ttsReady = false;
 
-    // 총 장소 수 (하드코딩 제거 → 자동 계산)
-    const TOTAL_PLACES = middlePlaces.length + finalPlaces.length;
+    // 중간 미션 장소 중 매 게임마다 랜덤으로 방문할 개수 (드라이브 스루 제외)
+    const MIDDLE_VISIT_COUNT = 4;
+
+    // 총 장소 수 (랜덤 선택 개수 + 마지막 드라이브 스루)
+    const TOTAL_PLACES = MIDDLE_VISIT_COUNT + finalPlaces.length;
 
     // ─── TTS 워밍업 (iOS Safari 첫 음성 문제 해결) ────────────
     function warmUpTTS() {
@@ -578,18 +588,30 @@
         document.getElementById('start-btn').disabled = !(isBeltChecked && isLicenseChecked);
     }
 
+    // ─── 배열을 랜덤하게 섞는 함수 (Fisher–Yates) ─────────────
+    function shuffleArray(arr) {
+        const result = [...arr];
+        for (let i = result.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [result[i], result[j]] = [result[j], result[i]];
+        }
+        return result;
+    }
+
     // ─── 내비게이션 시작 ──────────────────────────────────────
     function startNavigation() {
-        remainingPlaces = [...middlePlaces].sort(() => Math.random() - 0.5);
+        // 드라이브 스루를 제외한 장소 풀 중 4곳만 랜덤으로 골라서 방문
+        remainingPlaces = shuffleArray(middlePlaces).slice(0, MIDDLE_VISIT_COUNT);
         visitedPlacesCount = 0;
         isFinalStage = false;
         finalStageIndex = 0;
         tunnelTriggered = false;
 
-        for (let i = 1; i <= TOTAL_PLACES; i++) {
-            const b = document.getElementById(`badge-p${i}`);
+        // 이번 판에 선택되지 않은 장소 배지까지 포함해 전체 초기화
+        [...middlePlaces, ...finalPlaces].forEach(place => {
+            const b = document.getElementById(`badge-${place.id}`);
             if (b) b.className = 'badge';
-        }
+        });
 
         document.getElementById('progress-container').style.display = 'block';
         document.getElementById('route-summary').style.display = 'flex';
@@ -599,8 +621,8 @@
 
     // ─── 다음 장소 결정 ───────────────────────────────────────
     function getNextLocation() {
-        // 터널 이벤트: 전체 경로의 중간 지점에서 발동
-        const tunnelTriggerPoint = Math.floor(middlePlaces.length / 2);
+        // 터널 이벤트: 이번 게임에 선택된 중간 장소들의 중간 지점에서 발동
+        const tunnelTriggerPoint = Math.floor(MIDDLE_VISIT_COUNT / 2);
         if (visitedPlacesCount === tunnelTriggerPoint && !isFinalStage && !tunnelTriggered) {
             tunnelTriggered = true;
             document.getElementById('tunnel-overlay').style.display = 'flex';
